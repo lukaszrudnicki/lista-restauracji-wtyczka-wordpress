@@ -57,8 +57,26 @@ class Restaurant_Meta_Boxes {
 
             <p>
                 <label for="restaurant_opening_hours">Godziny otwarcia:</label>
-                <textarea id="restaurant_opening_hours" name="restaurant_opening_hours" rows="3" cols="40"><?php echo esc_textarea($opening_hours); ?></textarea>
-                <span class="description">Użyj znaczników &lt;strong&gt; do pogrubienia tekstu.</span>
+                <?php
+                // Użyj wp_editor dla lepszej obsługi HTML
+                wp_editor($opening_hours, 'restaurant_opening_hours', array(
+                    'textarea_name' => 'restaurant_opening_hours',
+                    'textarea_rows' => 5,
+                    'media_buttons' => false,
+                    'teeny' => true,
+                    'quicktags' => array(
+                        'buttons' => 'strong,em,ul,ol,li,link'
+                    ),
+                    'tinymce' => array(
+                        'toolbar1' => 'bold,italic,bullist,numlist,separator,link,unlink',
+                        'toolbar2' => '',
+                        'toolbar3' => ''
+                    )
+                ));
+                ?>
+                <span class="description">
+                    Możesz używać <strong>pogrubienia</strong>, <em>kursywy</em>, list i enterów do formatowania godzin otwarcia.
+                </span>
             </p>
         </div>
         <?php
@@ -97,17 +115,17 @@ class Restaurant_Meta_Boxes {
         if (!current_user_can('edit_post', $post_id)) return;
 
         $fields = array(
-            'restaurant_address',
-            'restaurant_city',
-            'restaurant_phone',
-            'restaurant_opening_hours',
-            'restaurant_latitude',
-            'restaurant_longitude'
+            'restaurant_address' => 'sanitize_text_field',
+            'restaurant_city' => 'sanitize_text_field',
+            'restaurant_phone' => 'sanitize_text_field',
+            'restaurant_opening_hours' => 'wp_kses_post', // Pozwala na podstawowe HTML
+            'restaurant_latitude' => 'sanitize_text_field',
+            'restaurant_longitude' => 'sanitize_text_field'
         );
 
-        foreach ($fields as $field) {
+        foreach ($fields as $field => $sanitize_function) {
             if (isset($_POST[$field])) {
-                $value = sanitize_text_field($_POST[$field]);
+                $value = $sanitize_function($_POST[$field]);
                 update_post_meta($post_id, '_' . $field, $value);
             }
         }
@@ -124,8 +142,10 @@ class Restaurant_Meta_Boxes {
         }
 
         $api_key = get_option('lr_google_maps_api_key');
-        wp_enqueue_script('google-maps', "https://maps.googleapis.com/maps/api/js?key={$api_key}&libraries=places", array(), null, true);
-        wp_enqueue_script('lr-admin-script', LR_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery', 'google-maps'), '1.0', true);
+        if (!empty($api_key)) {
+            wp_enqueue_script('google-maps', "https://maps.googleapis.com/maps/api/js?key={$api_key}&libraries=places", array(), null, true);
+            wp_enqueue_script('lr-admin-script', LR_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery', 'google-maps'), '1.0', true);
+        }
         wp_enqueue_style('lr-admin-style', LR_PLUGIN_URL . 'assets/css/admin-style.css');
     }
 }

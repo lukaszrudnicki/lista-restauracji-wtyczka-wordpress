@@ -42,6 +42,40 @@
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+/* Badge filtering */
+.lr-city-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.lr-city-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    background-color: #e9ecef;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.lr-city-badge:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+}
+
+.lr-city-badge.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #0056b3;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
 /* Mapa */
 .lr-restaurant-map {
     border-radius: 12px;
@@ -247,9 +281,10 @@
 }
 
 .lr-modal__info p {
-    margin-bottom: 15px;
+    margin-bottom: 0px;
     line-height: 1.6;
     font-size: 15px;
+    padding: 0 !important;
 }
 
 .lr-modal__info p:last-child {
@@ -299,6 +334,15 @@
         max-width: 100%;
     }
     
+    .lr-city-badges {
+        gap: 6px;
+    }
+    
+    .lr-city-badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+    
     .lr-card__body {
         padding: 15px;
     }
@@ -309,7 +353,13 @@
     
     .lr-modal__content {
         width: 95%;
-        margin: 10px;
+        max-width: none;
+        margin: 0;
+        top: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        max-height: 90vh;
+        position: fixed;
     }
     
     .lr-modal__info {
@@ -318,6 +368,10 @@
     
     .lr-modal__title {
         font-size: 18px;
+    }
+    
+    .lr-modal__image-container {
+        max-height: 200px;
     }
 }
 
@@ -336,11 +390,48 @@
         padding: 10px;
     }
     
+    .lr-city-badges {
+        gap: 4px;
+    }
+    
+    .lr-city-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .lr-modal__content {
+        width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        top: 0;
+        left: 0;
+        transform: none;
+        border-radius: 0;
+        margin: 0;
+        position: fixed;
+        overflow-y: auto;
+    }
+    
     .lr-modal__close {
         top: 10px;
         right: 15px;
         width: 35px;
         height: 35px;
         font-size: 24px;
+        z-index: 20;
+    }
+    
+    .lr-modal__image-container {
+        max-height: 180px;
+        border-radius: 0;
+    }
+    
+    .lr-modal__info {
+        padding: 20px 15px 30px 15px;
+    }
+    
+    .lr-modal__title {
+        font-size: 20px;
+        margin-bottom: 15px;
     }
 }

@@ -126,6 +126,7 @@ function lr_restaurant_map_list_shortcode($atts) {
         'display_mode' => 'both',
         'show_images' => 'yes',
         'show_city_filter' => 'yes',
+        'city_filter_type' => 'dropdown', // nowy parametr: dropdown lub badges
         'default_city' => '',
         'map_height' => '400',
         'map_zoom' => '5',
@@ -229,13 +230,17 @@ function lr_get_restaurants() {
 
         $image_url = lr_get_restaurant_image($restaurant->ID, 'large');
 
+        // Pobierz i sformatuj godziny otwarcia
+        $opening_hours = get_post_meta($restaurant->ID, '_restaurant_opening_hours', true);
+        $formatted_opening_hours = !empty($opening_hours) ? wpautop(wp_kses_post($opening_hours)) : '';
+
         $data[] = array(
             'id' => $restaurant->ID,
             'title' => get_the_title($restaurant->ID),
             'address' => get_post_meta($restaurant->ID, '_restaurant_address', true),
             'city' => get_post_meta($restaurant->ID, '_restaurant_city', true),
             'phone' => get_post_meta($restaurant->ID, '_restaurant_phone', true),
-            'opening_hours' => get_post_meta($restaurant->ID, '_restaurant_opening_hours', true),
+            'opening_hours' => $formatted_opening_hours,
             'latitude' => $latitude,
             'longitude' => $longitude,
             'image' => $image_url
@@ -280,6 +285,18 @@ function lr_admin_notices() {
         </div>
         <?php
     }
+}
+
+// Funkcja do ładowania szablonów dla restauracji
+add_filter('template_include', 'lr_template_include');
+function lr_template_include($template) {
+    if (is_singular('restauracje')) {
+        $plugin_template = LR_PLUGIN_DIR . 'templates/single-restauracje.php';
+        if (file_exists($plugin_template)) {
+            return $plugin_template;
+        }
+    }
+    return $template;
 }
 
 // Bezpieczeństwo

@@ -41,7 +41,23 @@ class WPBakery_Integration {
                     'param_name' => 'show_city_filter',
                     'value' => array(__('Tak', 'lista-restauracji') => 'yes'),
                     'std' => 'yes',
-                    'description' => __('Pokaż dropdown do filtrowania po mieście', 'lista-restauracji'),
+                    'description' => __('Pokaż filtr do filtrowania po mieście', 'lista-restauracji'),
+                    'group' => __('Wyświetlanie', 'lista-restauracji')
+                ),
+                array(
+                    'type' => 'dropdown',
+                    'heading' => __('Typ filtra miasta', 'lista-restauracji'),
+                    'param_name' => 'city_filter_type',
+                    'value' => array(
+                        __('Lista rozwijana', 'lista-restauracji') => 'dropdown',
+                        __('Badge (przyciski)', 'lista-restauracji') => 'badges'
+                    ),
+                    'std' => 'dropdown',
+                    'description' => __('Wybierz sposób wyświetlania filtra miast', 'lista-restauracji'),
+                    'dependency' => array(
+                        'element' => 'show_city_filter',
+                        'value' => array('yes')
+                    ),
                     'group' => __('Wyświetlanie', 'lista-restauracji')
                 ),
                 array(

@@ -134,11 +134,14 @@ jQuery(document).ready(function($) {
         }
 
         var clusterStyles = [{
-            textColor: 'white',
-            textSize: 18,
-            fontFamily: 'inherit',
-            height: 53,
-            width: 53
+            textColor: '#000000', // Czarny kolor tekstu
+            textSize: 14,
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            height: 52,
+            width: 53,
+            anchorText: [15, 0], // Wyśrodkowanie tekstu (połowa szerokości i wysokości)
+            anchorIcon: [26, 26]  // Wyśrodkowanie ikony
         }];
 
         if (lr_data.cluster_icon) {
@@ -252,38 +255,58 @@ jQuery(document).ready(function($) {
 
     function setupCityFilter(instance) {
         var $cityFilter = $('#lr-city-filter-' + instance.id);
-        if (!$cityFilter.length) return;
-
-        $cityFilter.on('change', function() {
-            var selectedCity = $(this).val();
-            
-            // Wyczyść markery
-            if (instance.map) {
-                instance.markers.forEach(function(marker) {
-                    marker.setMap(null);
-                });
-                instance.markers = [];
-            }
-
-            // Przefiltruj restauracje
-            var filteredRestaurants = instance.allRestaurants.filter(function(restaurant) {
-                return selectedCity === '' || restaurant.city === selectedCity;
+        var $cityBadges = $('#lr-city-badges-' + instance.id);
+        
+        // Obsługa dropdown filtra
+        if ($cityFilter.length) {
+            $cityFilter.on('change', function() {
+                filterByCity(instance, $(this).val());
             });
+        }
+        
+        // Obsługa badge filtra
+        if ($cityBadges.length) {
+            $cityBadges.on('click', '.lr-city-badge', function() {
+                var city = $(this).data('city');
+                
+                // Usuń aktywną klasę z innych badge'ów
+                $cityBadges.find('.lr-city-badge').removeClass('active');
+                
+                // Dodaj aktywną klasę do klikniętego badge'a
+                $(this).addClass('active');
+                
+                filterByCity(instance, city);
+            });
+        }
+    }
+    
+    function filterByCity(instance, selectedCity) {
+        // Wyczyść markery
+        if (instance.map) {
+            instance.markers.forEach(function(marker) {
+                marker.setMap(null);
+            });
+            instance.markers = [];
+        }
 
-            // Dodaj markery z powrotem
-            if (instance.map) {
-                filteredRestaurants.forEach(function(restaurant) {
-                    var marker = addMarker(instance, restaurant);
-                    if (marker) {
-                        instance.markers.push(marker);
-                    }
-                });
-                setupMarkerCluster(instance);
-            }
-
-            // Zaktualizuj listę
-            generateRestaurantList(instance, filteredRestaurants);
+        // Przefiltruj restauracje
+        var filteredRestaurants = instance.allRestaurants.filter(function(restaurant) {
+            return selectedCity === '' || restaurant.city === selectedCity;
         });
+
+        // Dodaj markery z powrotem
+        if (instance.map) {
+            filteredRestaurants.forEach(function(restaurant) {
+                var marker = addMarker(instance, restaurant);
+                if (marker) {
+                    instance.markers.push(marker);
+                }
+            });
+            setupMarkerCluster(instance);
+        }
+
+        // Zaktualizuj listę
+        generateRestaurantList(instance, filteredRestaurants);
     }
 
     function setupModalHandlers(instance) {

@@ -41,6 +41,7 @@ $lr_unique_id = get_query_var('lr_unique_id', 'lr-default-' . rand(1000, 9999));
 // Wartości domyślne
 $show_images = isset($lr_atts['show_images']) ? $lr_atts['show_images'] : 'yes';
 $show_city_filter = isset($lr_atts['show_city_filter']) ? $lr_atts['show_city_filter'] : 'yes';
+$city_filter_type = isset($lr_atts['city_filter_type']) ? $lr_atts['city_filter_type'] : 'dropdown';
 $display_mode = isset($lr_atts['display_mode']) ? $lr_atts['display_mode'] : 'both';
 $columns_desktop = isset($lr_atts['columns_desktop']) ? $lr_atts['columns_desktop'] : '4';
 $map_height = isset($lr_atts['map_height']) ? intval($lr_atts['map_height']) : 400;
@@ -61,12 +62,22 @@ $column_class = lr_get_column_class($columns_desktop);
         <label for="lr-city-filter-<?php echo esc_attr($lr_unique_id); ?>">
             Filtruj po mieście:
         </label>
+        
+        <?php if ($city_filter_type === 'badges'): ?>
+        <div id="lr-city-badges-<?php echo esc_attr($lr_unique_id); ?>" class="lr-city-badges">
+            <span class="lr-city-badge active" data-city="">Wszystkie miasta</span>
+            <?php foreach ($cities as $city): ?>
+                <span class="lr-city-badge" data-city="<?php echo esc_attr($city); ?>"><?php echo esc_html($city); ?></span>
+            <?php endforeach; ?>
+        </div>
+        <?php else: ?>
         <select id="lr-city-filter-<?php echo esc_attr($lr_unique_id); ?>" class="lr-form-control lr-city-filter">
             <option value="">Wszystkie miasta</option>
             <?php foreach ($cities as $city): ?>
                 <option value="<?php echo esc_attr($city); ?>"><?php echo esc_html($city); ?></option>
             <?php endforeach; ?>
         </select>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -113,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         display_mode: '<?php echo esc_js($display_mode); ?>',
         show_images: '<?php echo esc_js($show_images); ?>',
         show_city_filter: '<?php echo esc_js($show_city_filter); ?>',
+        city_filter_type: '<?php echo esc_js($city_filter_type); ?>',
         columns_desktop: '<?php echo esc_js($columns_desktop); ?>',
         map_height: '<?php echo intval($map_height); ?>',
         map_zoom: 5,
