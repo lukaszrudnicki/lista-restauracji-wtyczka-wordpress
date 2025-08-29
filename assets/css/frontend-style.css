@@ -1,0 +1,259 @@
+.lr-modal__info p {
+color:#000 !important;
+}
+
+.lr-plugin-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.lr-form-control option {
+    background-color: rgb(43, 43, 43); /* Szare tło */
+    color: white; /* Białe litery */
+}
+
+.lr-form-control option:hover {
+    background-color: red; /* Czerwone tło przy najechaniu */
+    color: white; /* Białe litery */
+}
+#lr-restaurant-map {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 30px;
+}
+
+
+.custom-cluster-marker {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+.custom-cluster-marker-inner {
+    color: #fff; /* kolor tekstu */
+    font-size: 16px; /* rozmiar czcionki */
+    font-weight: bold;
+    /* Dodaj więcej stylów według potrzeb */
+}
+.lr-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.lr-row-equal-height {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.lr-col-md-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+    padding: 15px;
+    display: flex;
+}
+
+.lr-card {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    background-color: #ffffff0f;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.lr-card__img-container {
+    position: relative !important;
+    width: 100% !important;
+    padding-bottom: 100% !important;
+    overflow: hidden !important;
+}
+
+.lr-card__img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.lr-card__body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background-color: #ffffff0f;
+}
+
+.lr-card__title {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.lr-card__text {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.lr-modal__image-container {
+    width: 100%;
+    max-height: 400px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.lr-modal__image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.lr-modal__info {
+    max-width: 100%;
+    padding: 20px;
+    color: #000 !important;
+}
+
+.lr-modal__title {
+    margin-bottom: 15px;
+    color: #000 !important;
+}
+
+
+
+@media (max-width: 768px) {
+    .lr-modal__content {
+        display: flex;
+        max-width: 800px;
+        flex-direction: row; /* Dodane */
+        width: 90% !important;
+    }
+    .lr-row-equal-height {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+    }
+    .lr-modal__image-container {
+        flex: 0 0 50%;
+        max-width: 100%;
+        margin-bottom: 0;
+    }
+
+    .lr-modal__info {
+        flex: 0 0 50%;
+        max-width: 100%;
+        overflow-y: auto; /* Dodane */
+    }
+}
+
+
+
+.lr-btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.lr-btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.lr-restaurant-filter {
+    margin-bottom: 20px;
+}
+
+.lr-form-control {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.lr-modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Zmienione z auto na hidden */
+    background-color: rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+}
+
+.lr-modal__content {
+    background-color: #fefefe;
+    position: absolute; /* Dodane */
+    top: 50%; /* Dodane */
+    left: 50%; /* Dodane */
+    transform: translate(-50%, -50%); /* Dodane */
+    width: 50%; /* Zmienione z 80% na 90% */
+    max-width: 500px;
+    max-height: 90vh; /* Dodane */
+    overflow-y: auto; /* Dodane */
+    border-radius: 10px;
+}
+.lr-blur {
+    filter: blur(5px);
+    transition: filter 0.3s ease-out;
+}
+
+.lr-modal__close {
+    color: #fff;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    margin: 10px;
+}
+
+.lr-modal__close:hover,
+.lr-modal__close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .lr-col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .lr-col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
