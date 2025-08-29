@@ -1,245 +1,313 @@
 jQuery(document).ready(function($) {
-    var map;
-    var markers = [];
-    var markerCluster;
-    var allRestaurants = [];
-
-    function initMap() {
-        map = new google.maps.Map(document.getElementById('lr-restaurant-map'), {
-            center: {lat: 52.0692, lng: 19.4803},
-            streetViewControl: false,
-            zoom: 5
-    });
-
-        fetchRestaurants();
+    // Sprawdź czy Google Maps jest dostępne
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        console.warn('Google Maps API nie jest załadowane');
+        return;
     }
 
-    function fetchRestaurants() {
+    // Znajdź wszystkie instancje mapy restauracji
+    $('.lr-plugin-container[id^="lr-instance-"]').each(function() {
+        var $container = $(this);
+        var instanceId = $container.attr('id');
+        
+        // Pobierz ustawienia z data-settings lub użyj domyślnych
+        var settings = $container.data('settings') || {
+            display_mode: 'both',
+            show_images: 'yes',
+            map_zoom: 5,
+            map_center_lat: 52.0692,
+            map_center_lng: 19.4803,
+            show_fields: 'address,city,phone,hours'
+        };
+        
+        var instance = {
+            id: instanceId,
+            settings: settings,
+            map: null,
+            markers: [],
+            markerCluster: null,
+            allRestaurants: [],
+            $container: $container
+        };
+        
+        // Inicjalizuj mapę jeśli potrzebna
+        if (settings.display_mode === 'both' || settings.display_mode === 'map_only') {
+            initMap(instance);
+        }
+        
+        // Pobierz dane restauracji
+        fetchRestaurants(instance);
+        
+        // Obsługa filtra miasta
+        setupCityFilter(instance);
+        
+        // Obsługa zamykania modala
+        setupModalHandlers(instance);
+    });
+
+    function initMap(instance) {
+        var mapElement = document.getElementById('lr-restaurant-map-' + instance.id);
+        if (!mapElement) return;
+
+        var centerLat = parseFloat(instance.settings.map_center_lat) || 52.0692;
+        var centerLng = parseFloat(instance.settings.map_center_lng) || 19.4803;
+        var zoom = parseInt(instance.settings.map_zoom) || 5;
+
+        instance.map = new google.maps.Map(mapElement, {
+            center: {lat: centerLat, lng: centerLng},
+            streetViewControl: false,
+            zoom: zoom
+        });
+    }
+
+    function fetchRestaurants(instance) {
         $.ajax({
             url: lr_data.ajax_url,
             method: 'POST',
             data: {
                 action: 'get_restaurants',
-                nonce: lr_data.nonce
+                nonce: lr_data.nonce,
+                limit: instance.settings.limit || -1
             },
             success: function(response) {
                 if (response.success && response.data) {
-                    allRestaurants = response.data;
-                    allRestaurants.forEach(addMarker);
-                    setupMarkerClusterer();
-                    generateRestaurantList(allRestaurants);
+                    instance.allRestaurants = response.data;
+                    
+                    if (instance.map) {
+                        instance.allRestaurants.forEach(function(restaurant) {
+                            addMarker(instance, restaurant);
+                        });
+                        setupMarkerCluster(instance);
+                    }
+                    
+                    generateRestaurantList(instance, instance.allRestaurants);
                 } else {
                     console.error("Błąd podczas pobierania restauracji:", response);
                 }
             },
             error: function(xhr, status, error) {
-                console.error("Błąd podczas pobierania restauracji:", error);
+                console.error("Błąd AJAX:", error);
             }
         });
     }
 
-    function addMarker(restaurant) {
+    function addMarker(instance, restaurant) {
+        if (!instance.map) return null;
+
         var lat = parseFloat(restaurant.latitude);
         var lng = parseFloat(restaurant.longitude);
-    
+
         if (isNaN(lat) || isNaN(lng)) {
-            console.warn("Nieprawidłowe współrzędne dla restauracji:", restaurant.title);
             return null;
         }
-    
+
         var markerOptions = {
             position: {lat: lat, lng: lng},
-            map: map,
+            map: instance.map,
             title: restaurant.title
         };
-    
-        // Dodaj customową ikonę, jeśli jest zdefiniowana
+
         if (lr_data.marker_icon) {
             markerOptions.icon = lr_data.marker_icon;
         }
-    
+
         var marker = new google.maps.Marker(markerOptions);
-    
+
         marker.addListener('click', function() {
-            showRestaurantModal(restaurant);
+            showRestaurantModal(instance, restaurant);
         });
-    
-        markers.push(marker);
+
+        instance.markers.push(marker);
         return marker;
     }
 
-    function setupMarkerClusterer() {
-        if (markerCluster) {
-            markerCluster.clearMarkers();
-        }
+    function setupMarkerCluster(instance) {
+        if (!instance.map || !instance.markers.length) return;
         
+        if (typeof MarkerClusterer === 'undefined') {
+            console.warn('MarkerClusterer nie jest dostępny');
+            return;
+        }
+
+        if (instance.markerCluster) {
+            instance.markerCluster.clearMarkers();
+        }
+
         var clusterStyles = [{
             textColor: 'white',
             textSize: 18,
             fontFamily: 'inherit',
             height: 53,
-            width: 53,
-            textAlign: 'center',
-            anchorText: [16, 1], // Wyśrodkowanie tekstu
-            anchorIcon: [27, 27]
+            width: 53
         }];
-    
+
         if (lr_data.cluster_icon) {
             clusterStyles[0].url = lr_data.cluster_icon;
         }
-    
-        var clusterOptions = {
+
+        instance.markerCluster = new MarkerClusterer(instance.map, instance.markers, {
             gridSize: 60,
             styles: clusterStyles
-        };
-    
-        markerCluster = new MarkerClusterer(map, markers, clusterOptions);
-    
-        // Dodaj niestandardowy styl CSS dla lepszego centrowania
-        var style = document.createElement('style');
-        style.textContent = `
-            .cluster-marker {
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
-            .cluster-marker > * {
-                position: static !important;
-                transform: none !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-
-    function showRestaurantModal(restaurant) {
-        var modalContent = `
-            <div class="lr-modal__image-container">
-                <img src="${restaurant.image}" alt="${restaurant.title}" class="lr-modal__image">
-            </div>
-            <div class="lr-modal__info">
-                <h3 class="lr-modal__title">${restaurant.title}</h3>
-                <p><strong>Adres:</strong> ${restaurant.address}</p>
-                <p><strong>Miasto:</strong> ${restaurant.city}</p>
-                <p><strong>Telefon:</strong> ${restaurant.phone}</p>
-                <p><strong>Godziny otwarcia:</strong><br>${restaurant.opening_hours}</p>
-            </div>
-        `;
-    
-        $('#lr-restaurantModalBody').html(modalContent);
-        $('#lr-restaurantModal').css('display', 'block');
-        $('.lr-plugin-container').addClass('lr-blur');
+        });
     }
 
-    function generateRestaurantList(restaurants) {
-        var $list = $('#lr-restaurant-list');
+    function generateRestaurantList(instance, restaurants) {
+        var $list = $('#lr-restaurant-list-' + instance.id);
+        if (!$list.length) return;
+
         $list.empty();
-        $list.addClass('lr-row-equal-height');
-    
+
+        if (!restaurants || restaurants.length === 0) {
+            $list.html('<div class="lr-no-restaurants"><p>Brak restauracji do wyświetlenia.</p></div>');
+            return;
+        }
+
+        var showImages = instance.settings.show_images === 'yes';
+        var showFields = (instance.settings.show_fields || '').split(',');
+
         restaurants.forEach(function(restaurant) {
+            var imageHtml = '';
+            if (showImages && restaurant.image) {
+                imageHtml = `
+                    <div class="lr-card__img-container">
+                        <img src="${restaurant.image}" alt="${restaurant.title}" class="lr-card__img">
+                    </div>
+                `;
+            }
+
+            var fieldsHtml = '';
+            showFields.forEach(function(field) {
+                field = field.trim();
+                if (field === 'address' && restaurant.address) {
+                    fieldsHtml += `<p class="lr-card__text">${restaurant.address}</p>`;
+                } else if (field === 'city' && restaurant.city) {
+                    fieldsHtml += `<p class="lr-card__text">${restaurant.city}</p>`;
+                } else if (field === 'phone' && restaurant.phone) {
+                    fieldsHtml += `<p class="lr-card__text">${restaurant.phone}</p>`;
+                }
+            });
+
             $list.append(`
                 <div class="lr-col-md-3">
                     <div class="lr-card" data-restaurant-id="${restaurant.id}">
-                        <div class="lr-card__img-container">
-                            <img src="${restaurant.image}" alt="${restaurant.title}" class="lr-card__img">
-                        </div>
+                        ${imageHtml}
                         <div class="lr-card__body">
                             <h5 class="lr-card__title">${restaurant.title}</h5>
-                            <p class="lr-card__text">${restaurant.address}</p>
-                            <p class="lr-card__text">${restaurant.city}</p>
+                            ${fieldsHtml}
                         </div>
                     </div>
                 </div>
             `);
         });
-    
-        $list.on('click', '.lr-card', function() {
+
+        // Obsługa kliknięć w karty
+        $list.off('click.lr-card').on('click.lr-card', '.lr-card', function() {
             var restaurantId = $(this).data('restaurant-id');
-            var restaurant = allRestaurants.find(r => r.id == restaurantId);
+            var restaurant = instance.allRestaurants.find(r => r.id == restaurantId);
             if (restaurant) {
-                showRestaurantModal(restaurant);
-            } else {
-                console.error('Nie znaleziono restauracji o ID:', restaurantId);
+                showRestaurantModal(instance, restaurant);
             }
         });
     }
 
-    function filterRestaurants(selectedCity) {
-        markers.forEach(function(marker) {
-            marker.setMap(null);
-        });
-        markers = [];
-    
-        var filteredRestaurants = allRestaurants.filter(function(restaurant) {
-            return selectedCity === '' || restaurant.city === selectedCity;
-        });
-    
-        filteredRestaurants.forEach(function(restaurant) {
-            var marker = addMarker(restaurant);
-            if (marker) {
-                markers.push(marker);
+    function showRestaurantModal(instance, restaurant) {
+        var showImages = instance.settings.show_images === 'yes';
+        var showFields = (instance.settings.show_fields || '').split(',');
+
+        var imageHtml = '';
+        if (showImages && restaurant.image) {
+            imageHtml = `
+                <div class="lr-modal__image-container">
+                    <img src="${restaurant.image}" alt="${restaurant.title}" class="lr-modal__image">
+                </div>
+            `;
+        }
+
+        var fieldsHtml = '';
+        showFields.forEach(function(field) {
+            field = field.trim();
+            if (field === 'address' && restaurant.address) {
+                fieldsHtml += `<p><strong>Adres:</strong> ${restaurant.address}</p>`;
+            } else if (field === 'city' && restaurant.city) {
+                fieldsHtml += `<p><strong>Miasto:</strong> ${restaurant.city}</p>`;
+            } else if (field === 'phone' && restaurant.phone) {
+                fieldsHtml += `<p><strong>Telefon:</strong> ${restaurant.phone}</p>`;
+            } else if (field === 'hours' && restaurant.opening_hours) {
+                fieldsHtml += `<p><strong>Godziny otwarcia:</strong><br>${restaurant.opening_hours}</p>`;
             }
         });
-    
-        if (markerCluster) {
-            markerCluster.clearMarkers();
-            markerCluster.addMarkers(markers);
-        } else {
-            setupMarkerClusterer();
-        }
-    
-        if (markers.length > 0) {
-            var bounds = new google.maps.LatLngBounds();
-            markers.forEach(function(marker) {
-                bounds.extend(marker.getPosition());
+
+        var modalContent = `
+            ${imageHtml}
+            <div class="lr-modal__info">
+                <h3 class="lr-modal__title">${restaurant.title}</h3>
+                ${fieldsHtml}
+            </div>
+        `;
+
+        $('#lr-restaurantModalBody-' + instance.id).html(modalContent);
+        $('#lr-restaurantModal-' + instance.id).css('display', 'block');
+        instance.$container.addClass('lr-blur');
+    }
+
+    function setupCityFilter(instance) {
+        var $cityFilter = $('#lr-city-filter-' + instance.id);
+        if (!$cityFilter.length) return;
+
+        $cityFilter.on('change', function() {
+            var selectedCity = $(this).val();
+            
+            // Wyczyść markery
+            if (instance.map) {
+                instance.markers.forEach(function(marker) {
+                    marker.setMap(null);
+                });
+                instance.markers = [];
+            }
+
+            // Przefiltruj restauracje
+            var filteredRestaurants = instance.allRestaurants.filter(function(restaurant) {
+                return selectedCity === '' || restaurant.city === selectedCity;
             });
-    
-            // Ustawienie maksymalnego poziomu przybliżenia
-            var maxZoom = 12; // Możesz dostosować tę wartość
-    
-            map.fitBounds(bounds);
-    
-            // Ograniczenie poziomu przybliżenia
-            google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
-                if (map.getZoom() > maxZoom) {
-                    map.setZoom(maxZoom);
-                }
-            });
-        }
-    
-        generateRestaurantList(filteredRestaurants);
-    }
-    function closeRestaurantModal() {
-        $('#lr-restaurantModal').css('display', 'none');
-        $('.lr-plugin-container').removeClass('lr-blur');
-        $('body').css('overflow', '');
-    }
-    $('#lr-city-filter').on('change', function() {
-        var selectedCity = $(this).val();
-        filterRestaurants(selectedCity);
-    });
 
-// Definiujemy funkcję zamykającą modal
-function closeRestaurantModal() {
-    $('#lr-restaurantModal').css('display', 'none');
-    $('.lr-plugin-container').removeClass('lr-blur');
-    $('body').css('overflow', ''); // Przywraca możliwość scrollowania strony
-}
+            // Dodaj markery z powrotem
+            if (instance.map) {
+                filteredRestaurants.forEach(function(restaurant) {
+                    var marker = addMarker(instance, restaurant);
+                    if (marker) {
+                        instance.markers.push(marker);
+                    }
+                });
+                setupMarkerCluster(instance);
+            }
 
-// Obsługa kliknięcia przycisku zamykania
-$('.lr-modal__close').on('click', closeRestaurantModal);
-
-// Obsługa kliknięcia poza modalem
-$(window).on('click', function(event) {
-    if (event.target == document.getElementById('lr-restaurantModal')) {
-        closeRestaurantModal();
+            // Zaktualizuj listę
+            generateRestaurantList(instance, filteredRestaurants);
+        });
     }
-});
 
-    // Inicjalizacja mapy po załadowaniu API Google Maps
-    if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
-        initMap();
-    } else {
-        console.error('Google Maps API nie jest załadowane');
+    function setupModalHandlers(instance) {
+        // Zamykanie przez X
+        $(document).on('click', '#lr-restaurantModal-' + instance.id + ' .lr-modal__close', function() {
+            closeModal(instance);
+        });
+
+        // Zamykanie przez kliknięcie w tło
+        $(document).on('click', '#lr-restaurantModal-' + instance.id, function(event) {
+            if (event.target === this) {
+                closeModal(instance);
+            }
+        });
     }
+
+    function closeModal(instance) {
+        $('#lr-restaurantModal-' + instance.id).css('display', 'none');
+        instance.$container.removeClass('lr-blur');
+    }
+
+    // Globalna funkcja dla kompatybilności
+    window.initRestaurantMapInstance = function(instanceId) {
+        // Ta funkcja jest wywoływana z template, ale logika jest już w $(document).ready
+        console.log('Initializing restaurant map instance:', instanceId);
+    };
 });

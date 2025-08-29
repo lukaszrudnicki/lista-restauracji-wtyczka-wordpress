@@ -1,44 +1,56 @@
-.lr-modal__info p {
-color:#000 !important;
-}
+/* Podstawowe style dla wtyczki Lista Restauracji */
 
 .lr-plugin-container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-}
-.lr-form-control option {
-    background-color: rgb(43, 43, 43); /* Szare tło */
-    color: white; /* Białe litery */
+    position: relative;
 }
 
-.lr-form-control option:hover {
-    background-color: red; /* Czerwone tło przy najechaniu */
-    color: white; /* Białe litery */
+/* Filtr restauracji */
+.lr-restaurant-filter {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
 }
-#lr-restaurant-map {
+
+.lr-restaurant-filter label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.lr-form-control {
+    display: block;
     width: 100%;
-    height: 400px;
-    margin-bottom: 30px;
+    max-width: 300px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out;
 }
 
-
-.custom-cluster-marker {
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background-size: contain !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
+.lr-form-control:focus {
+    border-color: #007bff;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.custom-cluster-marker-inner {
-    color: #fff; /* kolor tekstu */
-    font-size: 16px; /* rozmiar czcionki */
-    font-weight: bold;
-    /* Dodaj więcej stylów według potrzeb */
+/* Mapa */
+.lr-restaurant-map {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e9ecef;
 }
+
+/* System siatki */
 .lr-row {
     display: flex;
     flex-wrap: wrap;
@@ -49,6 +61,13 @@ color:#000 !important;
 .lr-row-equal-height {
     display: flex;
     flex-wrap: wrap;
+    align-items: stretch;
+}
+
+/* Kolumny */
+.lr-col-md-2 {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
 }
 
 .lr-col-md-3 {
@@ -58,23 +77,44 @@ color:#000 !important;
     display: flex;
 }
 
+.lr-col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.lr-col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+/* Karty restauracji */
 .lr-card {
     cursor: pointer;
-    transition: transform 0.3s ease;
-    background-color: #ffffff0f;
-    border-radius: 10px;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.lr-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
 }
 
 .lr-card__img-container {
     position: relative !important;
     width: 100% !important;
-    padding-bottom: 100% !important;
+    padding-bottom: 60% !important;
     overflow: hidden !important;
+    background-color: #f8f9fa;
+    border-radius: 12px 12px 0 0;
 }
 
 .lr-card__img {
@@ -84,119 +124,41 @@ color:#000 !important;
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
+    transition: transform 0.3s ease;
+}
+
+.lr-card:hover .lr-card__img {
+    transform: scale(1.05);
 }
 
 .lr-card__body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    padding: 15px;
-    background-color: #ffffff0f;
+    padding: 20px;
+    background-color: #fff;
 }
 
 .lr-card__title {
     font-size: 18px;
-    margin-bottom: 10px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #333;
+    line-height: 1.3;
 }
 
 .lr-card__text {
     font-size: 14px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: #666;
+    line-height: 1.4;
 }
 
-.lr-modal__image-container {
-    width: 100%;
-    max-height: 400px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    border-radius: 10px;
+.lr-card__text:last-child {
+    margin-bottom: 0;
 }
 
-.lr-modal__image {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-.lr-modal__info {
-    max-width: 100%;
-    padding: 20px;
-    color: #000 !important;
-}
-
-.lr-modal__title {
-    margin-bottom: 15px;
-    color: #000 !important;
-}
-
-
-
-@media (max-width: 768px) {
-    .lr-modal__content {
-        display: flex;
-        max-width: 800px;
-        flex-direction: row; /* Dodane */
-        width: 90% !important;
-    }
-    .lr-row-equal-height {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: stretch;
-    }
-    .lr-modal__image-container {
-        flex: 0 0 50%;
-        max-width: 100%;
-        margin-bottom: 0;
-    }
-
-    .lr-modal__info {
-        flex: 0 0 50%;
-        max-width: 100%;
-        overflow-y: auto; /* Dodane */
-    }
-}
-
-
-
-.lr-btn {
-    display: inline-block;
-    font-weight: 400;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    user-select: none;
-    border: 1px solid transparent;
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: .25rem;
-    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-
-.lr-btn-primary {
-    color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
-}
-
-.lr-restaurant-filter {
-    margin-bottom: 20px;
-}
-
-.lr-form-control {
-    display: block;
-    width: 100%;
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: .25rem;
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-
+/* Modal */
 .lr-modal {
     display: none;
     position: fixed;
@@ -205,26 +167,23 @@ color:#000 !important;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* Zmienione z auto na hidden */
-    background-color: rgba(0,0,0,0.4);
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
 }
 
 .lr-modal__content {
-    background-color: #fefefe;
-    position: absolute; /* Dodane */
-    top: 50%; /* Dodane */
-    left: 50%; /* Dodane */
-    transform: translate(-50%, -50%); /* Dodane */
-    width: 50%; /* Zmienione z 80% na 90% */
-    max-width: 500px;
-    max-height: 90vh; /* Dodane */
-    overflow-y: auto; /* Dodane */
-    border-radius: 10px;
-}
-.lr-blur {
-    filter: blur(5px);
-    transition: filter 0.3s ease-out;
+    background-color: #ffffff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .lr-modal__close {
@@ -234,20 +193,131 @@ color:#000 !important;
     font-weight: bold;
     cursor: pointer;
     position: absolute;
-    margin: 10px;
+    top: 15px;
+    right: 20px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    transition: all 0.2s ease;
 }
 
 .lr-modal__close:hover,
 .lr-modal__close:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
 }
 
+.lr-modal__image-container {
+    width: 100%;
+    max-height: 300px;
+    overflow: hidden;
+    margin-bottom: 0;
+    border-radius: 15px 15px 0 0;
+    position: relative;
+}
+
+.lr-modal__image {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.lr-modal__info {
+    padding: 25px;
+    color: #333 !important;
+}
+
+.lr-modal__info * {
+    color: #333 !important;
+}
+
+.lr-modal__title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333 !important;
+    line-height: 1.3;
+}
+
+.lr-modal__info p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+.lr-modal__info p:last-child {
+    margin-bottom: 0;
+}
+
+.lr-modal__info strong {
+    font-weight: 600;
+    color: #007bff !important;
+}
+
+/* Blur effect */
+.lr-blur {
+    filter: blur(5px);
+    transition: filter 0.3s ease-out;
+}
+
+/* Komunikaty */
+.lr-no-restaurants {
+    width: 100%;
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.lr-error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+/* Responsywność */
 @media (max-width: 768px) {
     .lr-col-md-3 {
         flex: 0 0 50%;
         max-width: 50%;
+    }
+    
+    .lr-restaurant-filter {
+        padding: 12px;
+    }
+    
+    .lr-form-control {
+        max-width: 100%;
+    }
+    
+    .lr-card__body {
+        padding: 15px;
+    }
+    
+    .lr-card__title {
+        font-size: 16px;
+    }
+    
+    .lr-modal__content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .lr-modal__info {
+        padding: 15px;
+    }
+    
+    .lr-modal__title {
+        font-size: 18px;
     }
 }
 
@@ -255,5 +325,22 @@ color:#000 !important;
     .lr-col-md-3 {
         flex: 0 0 100%;
         max-width: 100%;
+    }
+    
+    .lr-card__img-container {
+        padding-bottom: 50% !important;
+    }
+    
+    .lr-restaurant-filter {
+        margin-bottom: 15px;
+        padding: 10px;
+    }
+    
+    .lr-modal__close {
+        top: 10px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 24px;
     }
 }
